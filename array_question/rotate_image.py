@@ -14,7 +14,16 @@ class Solution(object):
         return matrix
 
 
+class Solution2(object):
+    def rotate_image(self, matrix):
+        new_matrix = zip(*matrix)
+        print matrix
+        for i in new_matrix:
+            list(i).reverse()
+        return new_matrix
+
+
 if __name__ == '__main__':
-    solution = Solution()
-    matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+    solution = Solution2()
+    matrix = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
     print solution.rotate_image(matrix)
