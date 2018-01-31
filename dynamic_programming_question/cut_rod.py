@@ -37,12 +37,16 @@ class Solution2(object):
 class Solution3(object):
     def cut_rod(self, p, n):
         max_value = [0] * (n + 1)
+        length_first_value = list(max_value)
         for i in range(1, n + 1):
             max_value_i = 0
             for j in range(1, i + 1):
+                if max_value_i < p[j] + max_value[i - j]:
+                    max_value_i = p[j] + max_value[i - j]
+                    length_first_value[i] = j    # 长度为i的 第一段最优解为j
                 max_value_i = max(max_value_i, p[j] + max_value[i - j])
             max_value[i] = max_value_i
-        return max_value[n]
+        return max_value[n], length_first_value
 
 
 if __name__ == '__main__':
@@ -58,5 +62,8 @@ if __name__ == '__main__':
     end2 = time.time()
     print 'no cache time', end2 - end1
     solution2 = Solution3()
-    print solution2.cut_rod(p, n)
+    max_value, s = solution2.cut_rod(p, n)
+    while n > 0:
+        print s[n]
+        n -=  s[n]
     print 'bottom to top time', time.time() - end2
