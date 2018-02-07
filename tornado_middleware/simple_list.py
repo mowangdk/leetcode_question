@@ -36,7 +36,6 @@ class Counter(MiddleWare):
 
 class MiddleHandler(RequestHandler):
 
-    # middleware come from Application create
     def initialize(self, middleware):
         self.middleware = middleware
 
