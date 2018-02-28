@@ -24,6 +24,22 @@ class Solution(object):
         return all_result
 
 
+class Solution1(object):
+    def groupAnagrams(self, strs):
+        temp_dict = {}
+        for word in strs:
+            word_key = "".join(sorted(word))
+            if word_key not in temp_dict:
+                temp_dict[word_key] = [word]
+            else:
+                temp_dict[word_key].append(word)
+        print temp_dict
+        result = list()
+        for value in temp_dict.values():
+            result += [value]
+        return result
+
+
 if __name__ == '__main__':
     solution = Solution()
     print solution.groupAnagrams(["tea","and","ace","ad","eat","dans"])
