@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 # @Time  :  2018/1/9 下午4:43
 
-from bisect import *
-
 
 class Solution(object):
     def two_sum(self, nums, target):

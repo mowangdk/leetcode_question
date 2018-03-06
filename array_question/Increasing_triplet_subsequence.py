@@ -8,12 +8,14 @@ class Solution(object):
         number_length = len(nums)
         if number_length < 3:
             return False
-        a, b = 9999, 9999
+        a, b = None, None
         for i in range(len(nums)):
             if nums[i] <= a:
                 a = nums[i]
             elif nums[i] <= b:
                 b = nums[i]
+            elif a == b or b == nums[i]:
+                continue
             else:
                 return True
         return False
