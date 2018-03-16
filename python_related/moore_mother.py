@@ -85,7 +85,7 @@ class A(dict):
 
 
 # 因为复写了__setattr__方法， 所以初始化的时候并没有将c3 set进B的实例中， 导致c3的属性一直为空, 同样b.c1, b.c2, b.c3 也没有设置成功，
-# 仅仅是调用了__setitem__, 设置到属性里面去了
+# 仅仅是调用了__setitem__, 设置到对象里面去了
 
 class B(A):
     c2 = 'v2'
@@ -99,6 +99,9 @@ class B(A):
 
     def __getattr__(self, key):
         return self[key]
+
+    # def __setitem__(self, key, value):
+    #     pass
 
     def echo(self):
         print self.c1
@@ -114,7 +117,6 @@ def interview_question():
         print 'yes'
     else:
         print 'no'
-    print dir(b)
     b.c1 = "cv1"
     b.c2 = "cv2"
     b.c3 = "cv3"
