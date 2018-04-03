@@ -7,7 +7,7 @@
 BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
 # Redis同样使用默认数据库 0
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://10.200.3.16:6379/0'
 
 # 设定导入任务模块路径
 CELERY_IMPORTS = ['proj.task.tasks']
