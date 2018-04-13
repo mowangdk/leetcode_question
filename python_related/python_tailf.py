@@ -8,7 +8,7 @@ import time
 
 def coroutine(func):
     def start(*args, **kwargs):
-        cr = func(args, kwargs)
+        cr = func(*args, **kwargs)
         cr.next()
         return cr
     return start
@@ -65,5 +65,5 @@ if __name__ == '__main__':
     #     print line
 
     # 我们可以将source和sink和filter连接在一起
-    source_follow(logfile, grep2('python', sink_follow))
+    source_follow(logfile, grep2('python', sink_follow()))
 
