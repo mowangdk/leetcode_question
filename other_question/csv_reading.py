@@ -63,10 +63,6 @@ def reading_csv(file1, file2):
             conbine_double_list.append(ano_conbine_row_data)
 
 
-
-    print csv1_double_list
-
-
 if __name__ == '__main__':
     file1 = 'class1.csv'
     file2 = 'class2.csv'
