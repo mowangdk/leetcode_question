@@ -16,6 +16,7 @@ class Task(object):
         self.tid = Task.taskid  # Task ID
         self.target = target    # target coroutine
         self.sendval = None     # value to send
+        self.func = target.gi_code.co_name
 
     def run(self):
         return self.target.send(self.sendval)

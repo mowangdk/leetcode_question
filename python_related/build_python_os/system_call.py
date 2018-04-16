@@ -22,6 +22,7 @@ class SystemCall(object):
         pass
 
 
+# return a task's id number
 class GetTid(SystemCall):
 
     def handle(self):
@@ -29,6 +30,7 @@ class GetTid(SystemCall):
         self.sched.schedule(self.task)
 
 
+# Create a new task
 class NewTask(SystemCall):
 
     def __init__(self, target):
@@ -40,6 +42,7 @@ class NewTask(SystemCall):
         self.sched.schedule(self.task)
 
 
+# kill a task
 class KillTask(SystemCall):
 
     def __init__(self, tid):
@@ -55,22 +58,17 @@ class KillTask(SystemCall):
         self.sched.schedule(self.task)
 
 
-# def foo():
-#     mytid = yield GetTid()
-#     while True:
-#         print "I'm foo", mytid
-#         yield
-#
-#
-# def main():
-#     child = yield NewTask(foo())
-#     for i in xrange(5):
-#         yield
-#     yield KillTask(child)
-#     print "main done"
-#
-#
-# if __name__ == '__main__':
-#     sched = Scheduler()
-#     sched.new(main())
-#     sched.mainloop()
+# wait for a task to exit
+class WaitTask(SystemCall):
+
+    def __init__(self, tid):
+        self.tid = tid
+
+    # WaitTask handler 使得main方法从ready队列出队，进入到exit_waiting 队列中
+    def handle(self):
+        result = self.sched.waitforexit(self.task, self.tid)
+        self.task.sendval = result
+
+        if not result:
+            self.sched.schedule(self.task)
+
