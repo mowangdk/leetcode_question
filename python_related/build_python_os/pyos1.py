@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Time  :  2018/4/13 下午6:06
+import types
+
+from python_related.build_python_os.system_call import SystemCall
 
 
 class Task(object):
@@ -17,6 +20,25 @@ class Task(object):
         self.target = target    # target coroutine
         self.sendval = None     # value to send
         self.func = target.gi_code.co_name
+        self.stack = list()
 
     def run(self):
-        return self.target.send(self.sendval)
+        while True:
+            try:
+                result = self.target.send(self.sendval)
+                if isinstance(result, SystemCall): return result
+                if isinstance(result, types.GeneratorType):
+                    self.stack.append(self.target)
+                    self.sendval = None
+                    self.target = result
+                else:
+                    if not self.stack:
+                        return
+                    self.sendval = result
+                    self.target = self.stack.pop()
+            except StopIteration:
+                if not self.stack:
+                    raise
+                self.sendval = None
+                self.target = self.stack.pop()
+
