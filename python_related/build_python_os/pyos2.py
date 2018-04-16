@@ -3,6 +3,9 @@
 # @Time  :  2018/4/13 下午6:11
 
 from Queue import Queue
+
+import select
+
 from python_related.build_python_os.pyos1 import Task
 from python_related.build_python_os.system_call import SystemCall, GetTid, NewTask, KillTask
 
@@ -19,6 +22,10 @@ class Scheduler(object):
 
         # 这是一个所有等待退出的tasks的等待集合，
         self.exit_waiting = dict()
+
+        # 保留所有的阻塞io， 这些字典是由文件描述符映射到任务
+        self.read_waiting = dict()
+        self.write_waiting = dict()
 
     def new(self, target):        # 推送一个新的task到队列中
         newtask = Task(target)
@@ -40,10 +47,41 @@ class Scheduler(object):
         else:
             return False
 
+    # select 模块可以用来监视socket集合（或者file）的活动情况
+    # io轮询， 用select判断哪个文件描述符可以被使用， 没有block任意一个关联的任务
+    # 比较困难的是我们应该讲iopoll 放在什么位置， 你可以把它放到ioloop中， 但是这有可能导致过度轮询
+    # 特别是还有许多 待执行的task在准备队列中的时候
+    def iopoll(self, timeout):
+        if self.read_waiting or self.write_waiting:
+            # r 是传入数据用的sockets的列表
+            # w 是准备好接收传出数据的套接字列表
+            # e 是错误状态sockets的列表
+            r, w, e = select.select(self.read_waiting, self.write_waiting, [], timeout)
+            for fd in r:
+                self.schedule(self.read_waiting.pop(fd))
+            for fd in w:
+                self.schedule(self.write_waiting.pop(fd))
+
+    def iotask(self):
+        while True:
+            if self.ready.empty():
+                self.iopoll(None)
+            else:
+                self.iopoll(0)
+            yield
+
+    # 简单的放任务
+    def wait_for_read(self, task, fd):
+        self.read_waiting[fd] = task
+
+    def wait_for_write(self, task, fd):
+        self.write_waiting[fd] = task
+
     def schedule(self, task):
         self.ready.put(task)    # 将任务推送到ready 队列， 使得任务可以被执行
 
     def mainloop(self):    # 主调度循环， 它将所有队列中的任务全部执行到yield处
+        self.new(self.iotask())
         while self.taskmap:
             task = self.ready.get()
             try:

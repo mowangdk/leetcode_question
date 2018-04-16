@@ -72,3 +72,23 @@ class WaitTask(SystemCall):
         if not result:
             self.sched.schedule(self.task)
 
+
+# 这两个类只是等待I/O 事件， 但不实际上执行任何I/O
+class ReadWait(SystemCall):
+
+    def __init__(self, f):
+        self.f = f
+
+    def handle(self):
+        fd = self.f.fileno()
+        self.sched.wait_for_read(self.task, fd)
+
+
+class WriteWait(SystemCall):
+
+    def __init__(self, f):
+        self.f = f
+
+    def handle(self):
+        fd = self.f.fileno()
+        self.sched.wait_for_write(self.task, fd)
