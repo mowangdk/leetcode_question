@@ -5,7 +5,8 @@
 from socket import socket, AF_INET, SOCK_STREAM
 
 from python_related.build_python_os.pyos2 import Scheduler
-from python_related.build_python_os.system_call import NewTask, ReadWait, WriteWait
+from python_related.build_python_os.socket_io import Recv, Send, Accept
+from python_related.build_python_os.system_call import NewTask
 
 """
 在真正的操作系统里面， 直到IO操作结束， python解释器会一直停止
@@ -18,15 +19,13 @@ from python_related.build_python_os.system_call import NewTask, ReadWait, WriteW
 def handle_client(client, addr):
     print "Connection from", addr
     while True:
-        yield ReadWait(client)
-        data = client.recv(65535)
+        # 所有的io操作都变成了子协程
+        data = yield Recv(client, 65536)
         if not data:
             break
-        yield WriteWait(client)
-        client.send(data)
-    client.close()
+        yield Send(client, data)
     print "Client close"
-    yield    # make the function a generator/coroutine
+    client.close()
 
 
 def server(port):
@@ -36,8 +35,7 @@ def server(port):
     sock.listen(5)  # 同时连接server的数量
     # server loop， 等待新连接， 对每个新的客户端都分配一个新的task去处理
     while True:
-        yield ReadWait(sock)
-        client, addr = sock.accept()
+        client, addr = yield Accept(sock)
         yield NewTask(handle_client(client, addr))
 
 # 我们可以看到， io操作阻塞了整个进程
