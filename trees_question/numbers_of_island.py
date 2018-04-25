@@ -46,6 +46,51 @@ class Solution(object):
         return count
 
 
+class Solution1(object):
+    def numIsLands(self, grid):
+        ans = 0
+        if not len(grid):
+            return ans
+        m, n = len(grid), len(grid[0])
+        visited = [[False] * n for x in range(m)]  # m * n
+        self.grid = grid
+        self.visited = visited
+        self.m = m
+        self.n = n
+        for x in range(m):
+            for y in range(n):
+                if grid[x][y] == '1' and not visited[x][y]:
+                    ans += 1
+                    self.bfs(grid, visited, x, y, m, n)
+        return ans
+
+    # 广度优先搜索
+    def bfs(self, grid, visited, x, y, m, n):
+        dz = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        queue = [(x, y)]
+        visited[x][y] = True
+        while queue:
+            front = queue.pop(0)
+            for p in dz:
+                np = (front[0] + p[0], front[1] + p[1])
+                if self.isValid(np, m, n) and grid[np[0]][np[1]] == '1' and not visited[np[0]][np[1]]:
+                    visited[np[0]][np[1]] = True
+                    queue.append(np)
+
+    def dfs(self, x, y):
+        dz = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        for p in dz:
+            np = (x + p[0], y + p[1])
+            if self.isValid(np, self.m, self.n) and self.grid[np[0]][np[1]] == '1' and not self.visited[np[0]][np[1]]:
+                self.visited[np[0]][np[1]] = True
+                self.dfs(np[0], np[1])
+
+
+    def isValid(self, np, m, n):
+        return m > np[0] >= 0 and n > np[1] >= 0
+
+
+
 if __name__ == '__main__':
-    solution = Solution()
-    print solution.numIslands([["1", "1", "1"], ["0", "1", "0"], ["1", "1", "1"]])
+    solution = Solution1()
+    print solution.numIsLands([["1", "1", "1"], ["0", "1", "0"], ["1", "1", "1"]])
