@@ -75,4 +75,4 @@ class Solution(object):
 
 if __name__ == '__main__':
     solution = Solution()
-    print solution.exists([["b","a","b"],["b","b","a"],["b","b","b"]], "ab")
+    print solution.exist([["b","a","b"],["b","b","a"],["b","b","b"]], "ab")
