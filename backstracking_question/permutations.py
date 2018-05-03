@@ -33,7 +33,6 @@ class Solution(object):
                 res.append([nums[i]] + j)
         return res
 
-
 if __name__ == '__main__':
     solution = Solution()
     print solution.permute([1, 2, 3])

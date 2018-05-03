@@ -12,8 +12,7 @@ class Solution(object):
         return self.res
 
     def dfs(self, i, nums, subres):
-        if subres:
-            self.res.append(subres)
+        self.res.append(subres)
         for j in range(i, len(nums)):
             self.dfs(j + 1, nums, subres + [nums[j]])
 

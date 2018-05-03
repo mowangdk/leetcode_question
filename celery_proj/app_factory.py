@@ -9,5 +9,6 @@ from celery import Celery
 
 def make_app():
     app = Celery('celery_proj')
+    # a module named celeryconfig.py must be available to load from the current directory or on the Python path.
     app.config_from_object('celery_proj.celeryconfig')
     return app
