@@ -2,6 +2,8 @@
 
 import logging
 import socket
+from datetime import datetime
+
 from python_related.tornado_like_webframework.ioloop import IOLoop
 
 EOL1 = b'\n\n'
@@ -34,6 +36,23 @@ class Connection(object):
 
 
 class WSGIServer(object):
+    """
+    AF_INET 地址簇的成员是IPv4地址
+    AF_INET6 地址簇的成员是IPv6地址
+    AF_UNIX 地址簇的成员是Unix域 socket 的名称 (/var/run/mysqld/mysqld.sock)
+
+
+    SOCKET_STREAM 是基于TCP的， 数据传输比较有保障
+    SOCKET_DGRAM 是基于UDP的
+
+
+    SOL_SOCKET 在套接字级别上进行配置
+    all_list:
+        SOL_IP = 0
+        SOL_SOCKET = 65535
+        SOL_TCP = 6
+        SOL_UDP = 17
+    """
     ADDRESS_FAMILY = socket.AF_INET
     SOCKET_TYPE = socket.SOCK_STREAM
     BACKLOG = 5
@@ -54,6 +73,7 @@ class WSGIServer(object):
         ssocket = socket.socket(cls.ADDRESS_FAMILY, cls.SOCKET_TYPE)
         ssocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
         ssocket.bind(server_address)
+        # cls.BACKLOG 指定了在socket 未accpet之前允许保留的连接的个数
         ssocket.listen(cls.BACKLOG)
         ssocket.setblocking(0)
         return ssocket
@@ -84,6 +104,7 @@ class WSGIServer(object):
         fragment = connect.recv(1024)
         connection.request_buffer.append(fragment)
         last_fragment = ''.join(connection.request_buffer[:2])
+
         if EOL2 in last_fragment:
             ioloop = IOLoop.instance()
             ioloop.update_handler(fd, IOLoop.WRITE)
@@ -110,3 +131,29 @@ class WSGIServer(object):
         ioloop = IOLoop.instance()
         ioloop.remove_handler(fd)
         del self.conn_pool[fd]
+
+    def serve_forever(self):
+        self.ioloop.add_handler(self.ssocket, self._accept, IOLoop.READ | IOLoop.ERROR)
+
+        try:
+            self.ioloop.start()
+        finally:
+            self.ssocket.close()
+
+    def handle(self, connection):
+        def start_response(status, response_headers, exc_info=False):
+            utc_now = datetime.utcnow().strftime(self.HEADER_DATE_FORMAT)
+            connection.headers = response_headers + [
+                ('Date', utc_now),
+                ('Server', self.SERVER_NAME)
+            ]
+            connection.status = status
+        request_text = ''.join(connection.request_buffer)
+        environ = self.get_environ(request_text)
+        body = self.application(environ, start_response)
+        connection.response = self.package_response(body, connection)
+
+        request_line = request_text.splitlines()[0]
+        access_logger.info('%s "%s" %s %s', connection.address[0], request_line, connection.status.split(' ', 1), len(body[0]))
+
+        access_logger.debug('\n' + ''.join('< {line}\n'.format(line=line) for line in request_text.splitlines()))
