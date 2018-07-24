@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from python_related.tornado_like_webframework.concurrent import coroutine, Return
 from python_related.tornado_like_webframework.fake_tornado import BaseHandler, Application, run_server
 import pdb
