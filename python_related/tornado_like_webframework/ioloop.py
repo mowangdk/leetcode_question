@@ -3,6 +3,7 @@
 import collections
 import functools
 import select
+import pdb
 import time
 
 
@@ -171,6 +172,7 @@ class IOLoop(object):
     #     return future_cell[0].result(0)
 
     def add_future_callback(self, callback, *args, **kwargs):
+        pdb.set_trace()
         self._future_callbacks.append(
             functools.partial(callback, *args, **kwargs)
         )
