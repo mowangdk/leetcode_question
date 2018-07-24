@@ -119,12 +119,11 @@ class WSGIServer(object):
             self._close(connect)
         fd = connect.fileno()
         connection = self.conn_pool[fd]
-        pdb.set_trace()
         if not connection.handled:
             self.handle(connection)
-        byteswritten = connect.send(connection.reponse)
+        byteswritten = connect.send(connection.response)
         if byteswritten:
-            connection.reponse = connection.response[byteswritten:]
+            connection.response = connection.response[byteswritten:]
 
         if not len(connection.response):
             self._close(connect)
@@ -185,13 +184,15 @@ class WSGIServer(object):
         request_data = self.parse_request_buffer(request_text)
         scheme = request_data['SERVER_PROTOCOL'].split('/')[1].lower()
         environ = {
-            'wsgi.version': (1, 0),
-            'wsgi.url_scheme': scheme,
-            'wsgi.input': StringIO.StringIO(request_text),
-            'wsgi.errors': sys.stderr,
-            'wsgi.multithread': False,
-            'wsgi.multiprocess': False,
-            'wsgi.run_once': False,
+            # WSGI 规范
+            'wsgi.version': (1, 0),    # 代表 wsgi标准 1.0
+            'wsgi.url_scheme': scheme,    # http 或者https
+            'wsgi.input': StringIO.StringIO(request_text),    # 一个类文件的输入流， application可以通过这个获取 HTTP request body
+            'wsgi.errors': sys.stderr,    # 一个输出流， 当应用程序出错时， 可以将错误信息写入这里
+            'wsgi.multithread': False,    # 当 application对象可能被多个线程同时调用时， 这个值需要为True
+            'wsgi.multiprocess': False,    # 当 application对象可能被多个进程同时调用时， 这个值需要为True
+            'wsgi.run_once': False,    # 当 server期望application对象在进程的生命周期内只被调用一次时， 该值为 True
+            # CGI 规范
             'SERVER_NAME': self.server_name,
             'SERVER_PORT': self.server_port,
         }

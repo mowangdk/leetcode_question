@@ -102,6 +102,7 @@ class IOLoop(object):
                     callback = self._future_callbacks.popleft()
                     callback()
                 events = self.epoll.poll(self.PULL_TIMEOUT)
+                pdb.set_trace()
                 self.events.update(events)
                 while self.events:
                     fd, event = self.events.popitem()
