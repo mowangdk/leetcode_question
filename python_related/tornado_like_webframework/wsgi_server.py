@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-
+import StringIO
 import logging
 import socket
+import sys
 from datetime import datetime
 
 from python_related.tornado_like_webframework.ioloop import IOLoop
@@ -62,7 +63,7 @@ class WSGIServer(object):
 
     def __init__(self, server_address):
         self.ssocket = self.setup_server_socket(server_address)
-        host, self.server_port = self.ssocket.getsocketname()[:2]
+        host, self.server_port = self.ssocket.getsockname()[:2]
         self.server_name = socket.getfqdn()
 
         self.ioloop = IOLoop.instance()
@@ -157,3 +158,59 @@ class WSGIServer(object):
         access_logger.info('%s "%s" %s %s', connection.address[0], request_line, connection.status.split(' ', 1), len(body[0]))
 
         access_logger.debug('\n' + ''.join('< {line}\n'.format(line=line) for line in request_text.splitlines()))
+
+    @classmethod
+    def parse_request_buffer(cls, text):
+        content_lines = text.splitlines()
+        request_line = content_lines[0].rstrip('\r\n')
+        request_method, path, request_version = request_line.split()
+        if '?' in path:
+            path, query_string = path.split('?', 1)
+        else:
+            path, query_string = path, ''
+
+        return {
+            'PATH_INFO': path,
+            'REQUEST_METHOD': request_method,
+            'SERVER_PROTOCOL': request_version,
+            'QUERY_STRING': query_string
+        }
+
+    def get_environ(self, request_text):
+
+        request_data = self.parse_reuqest_buffer(request_text)
+        scheme = request_data['SERVER_PROTOCOL'].split('/')[1].lower()
+        environ = {
+            'wsgi.version': (1, 0),
+            'wsgi.url_scheme': scheme,
+            'wsgi.input': StringIO.StringIO(request_text),
+            'wsgi.errors': sys.stderr,
+            'wsgi.multithread': False,
+            'wsgi.multiprocess': False,
+            'wsgi.run_once': False,
+            'SERVER_NAME': self.server_name,
+            'SERVER_PORT': self.server_port,
+        }
+
+        environ.update(request_data)
+        return environ
+
+    def package_response(self, body, connection):
+        response = 'HTTP/1.1 {status}\r\n'.format(status=connection.status)
+        for header in connection.headers:
+            response += '{0}: {1}\r\n'.format(*header)
+        response += '\r\n'
+        for data in body:
+            response += data
+
+        access_logger.debug('\n' + ''.join('> {line}\n'.format(line=line) for line in response.splitlines()))
+        return response
+
+
+def make_server(host, port, application):
+
+    server_address = (host, port)
+    server = WSGIServer(server_address)
+    server.set_app(application)
+    return server
+
