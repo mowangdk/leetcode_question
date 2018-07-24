@@ -305,6 +305,7 @@ class Application(object):
         result = func(request=request, response=response)
         if isinstance(result, Future):
             return result.result
+        return result
 
 
 class BaseHandler(object):
