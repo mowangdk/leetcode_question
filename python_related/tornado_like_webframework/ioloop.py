@@ -3,8 +3,9 @@
 import collections
 import functools
 import select
-import pdb
 import time
+
+from python_related.tornado_like_webframework.ioloop_kqueue import _KQueue
 
 
 class IOLoop(object):
@@ -22,7 +23,12 @@ class IOLoop(object):
     def __init__(self):
         self.handlers = {}
         self.events = {}
-        self.epoll = select.epoll()
+        epoll = getattr(select, 'epoll', None)
+        if epoll:
+            self.epoll = epoll()
+        else:
+            # kqueue 目前会报 Bad file descripter 错误， 貌似是在关闭有数据的通道时报的问题。
+            self.epoll = _KQueue()
 
         self._future_callbacks = collections.deque()
 
@@ -102,7 +108,6 @@ class IOLoop(object):
                     callback = self._future_callbacks.popleft()
                     callback()
                 events = self.epoll.poll(self.PULL_TIMEOUT)
-                pdb.set_trace()
                 self.events.update(events)
                 while self.events:
                     fd, event = self.events.popitem()
@@ -173,7 +178,6 @@ class IOLoop(object):
     #     return future_cell[0].result(0)
 
     def add_future_callback(self, callback, *args, **kwargs):
-        pdb.set_trace()
         self._future_callbacks.append(
             functools.partial(callback, *args, **kwargs)
         )

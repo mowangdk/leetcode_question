@@ -7,12 +7,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from python_related.tornado_like_webframework.concurrent import coroutine, Return
 from python_related.tornado_like_webframework.fake_tornado import BaseHandler, Application, run_server
-import pdb
+
 
 class AppHandler(BaseHandler):
     @classmethod
     def get(cls, **kwargs):
-        pdb.set_trace()
         return "Marry Christmas"
 
 

@@ -4,7 +4,6 @@ import StringIO
 import logging
 import socket
 import sys
-import pdb
 from datetime import datetime
 
 from python_related.tornado_like_webframework.ioloop import IOLoop
@@ -107,7 +106,6 @@ class WSGIServer(object):
         fragment = connect.recv(1024)
         connection.request_buffer.append(fragment)
         last_fragment = ''.join(connection.request_buffer[:2])
-        pdb.set_trace()
 
         if EOL2 in last_fragment:
             ioloop = IOLoop.instance()
