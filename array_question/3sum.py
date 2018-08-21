@@ -20,11 +20,12 @@ A solution set is:
 
 """
 
+
 class Solution(object):
     def threeSum(self, nums):
-        tuple_list = set()
         if not nums:
-            return list(tuple_list)
+            return nums
+        tuple_list = set()
         nums.sort()
         for outer_index, num in enumerate(nums):
             rest_list = nums[outer_index+1:]
