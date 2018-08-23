@@ -19,6 +19,7 @@ Special thanks to @Freezen for adding this problem and creating all test cases.
 
 """
 
+
 class Solution(object):
     def rotate(self, nums, k):
         """
