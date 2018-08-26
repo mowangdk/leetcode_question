@@ -36,7 +36,7 @@ class Solution(object):
         :rtype: int
         """
         self.get_ordered_list(root)
-        return self.ordered_list[k]
+        return self.ordered_list[:k]
 
     def get_ordered_list(self, root):
         self.get_ordered_list(root.left)
