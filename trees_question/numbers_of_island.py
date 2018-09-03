@@ -4,16 +4,31 @@
 
 
 """
-Given a binary search tree, write a function kthSmallest to find the kth smallest element in it.
 
-Note:
-You may assume k is always valid, 1 ≤ k ≤ BST's total elements.
+Given a 2d grid map of '1's (land) and '0's (water), count the number of islands.
+An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.
+You may assume all four edges of the grid are all surrounded by water.
 
-Follow up:
-What if the BST is modified (insert/delete operations) often and you need to find the kth smallest frequently? How would you optimize the kthSmallest routine?
 
-Credits:
-Special thanks to @ts for adding this problem and creating all test cases.
+Example 1:
+
+Input:
+11110
+11010
+11000
+00000
+
+Output: 1
+Example 2:
+
+Input:
+11000
+11000
+00100
+00011
+
+Output: 3
+
 """
 
 
@@ -84,7 +99,6 @@ class Solution1(object):
             if self.isValid(np, self.m, self.n) and self.grid[np[0]][np[1]] == '1' and not self.visited[np[0]][np[1]]:
                 self.visited[np[0]][np[1]] = True
                 self.dfs(np[0], np[1])
-
 
     def isValid(self, np, m, n):
         return m > np[0] >= 0 and n > np[1] >= 0
