@@ -38,18 +38,20 @@ class Solution(object):
             else:
                 k = next_list[k]
 
-
     def kmp_search(self, origin_str, parten, next_list):
         i = 0
         j = 0
         s_len = len(origin_str)
         p_len = len(parten)
+        cmp_time = 0
         while i < s_len and j < p_len:
             if j == -1 or origin_str[i] == origin_str[j]:
+                cmp_time += 1
                 j += 1
                 i += 1
             else:
                 j = next_list[j]
+        print cmp_time
         if j == p_len:
             return i - j
         else:
@@ -59,4 +61,5 @@ class Solution(object):
 if __name__ == '__main__':
     solution = Solution()
     # print solution.get_next('DABCDABDE')
-    print solution.get_next('ABCDABD')
+    next = solution.get_next('abcabd')
+    solution.kmp_search('ababcabcabd', 'abcabd', next)
